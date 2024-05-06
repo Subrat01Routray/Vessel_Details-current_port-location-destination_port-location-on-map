@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Route Details</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+    <center>
+    <h1>Details</h1>
+    <p>Vessel Number: {{ route_details.vessel_number }}</p>
+    <p>Arrival Date: {{ route_details.arrival_date }}</p>
+    <p>Current port: {{ route_details.current_port}}</p>
+    <p>Departure Date: {{ route_details.departure_date }}</p>
+    <p>Destination port: {{ route_details.destination_port }}</p>
+    </center>
+    <!-- <div id="map" style="height: 400px;"></div> -->
+
+    <!-- <script>
+        var map = L.map('map').setView([{route_details,current_port_latitude} ,{ route_details,current_port_longitude }], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var currentPort = L.marker([ route_details.current_port_latitude ,route_details.current_port_longitude ]).addTo(map);
+        currentPort.bindPopup("Current Port");
+
+        var destinationPort = L.marker([route_details.destination_port_latitude , route_details.destination_port_longitude ]).addTo(map);
+        destinationPort.bindPopup("Destination Port");
+
+        var pathCoordinates = [
+            [route_details.current_port_latitude ,route_details.current_port_longitude ],
+            [ route_details.destination_port_latitude ,  route_details.destination_port_longitude ]
+        ];
+
+        var path = L.polyline(pathCoordinates, {color: 'red'}).addTo(map);
+    </script> -->
+
+
+    <div id="map" style="width:100%; height: 100vh"></div>
+	<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+
+	<script>
+
+		var map = L.map('map').setView([20.5937, 78.9629], 5);
+		mapLink = "<a href='http://openstreetmap.org'>OpenStreetMap</a>";
+		L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: 'Leaflet &copy; ' + mapLink + ', contribution', maxZoom: 18 }).addTo(map);
+
+		var taxiIcon = L.icon({
+			iconUrl: 'img/taxi.png',
+			iconSize: [70, 70]
+		})
+        
+		var marker = L.marker([{{route_details.current_port_latitude}},{{route_details.current_port_longitude}}], { icon: taxiIcon }).addTo(map);
+
+		map.on('click', function (e) {
+			console.log(e)
+			var newMarker = L.marker([{{route_details.destination_port_latitude}},{{route_details.destination_port_longitude}}]).addTo(map);
+			L.Routing.control({
+				waypoints: [
+					L.latLng( {{route_details.current_port_latitude}},{{route_details.current_port_longitude}}),
+					L.latLng({{route_details.destination_port_latitude}},{{route_details.destination_port_longitude}})
+				]
+			}).on('routesfound', function (e) {
+				var routes = e.routes;
+				console.log(routes);
+
+				e.routes[0].coordinates.forEach(function (coord, index) {
+					setTimeout(function () {
+						marker.setLatLng([coord.lat, coord.lng]);
+					}, 100 * index)
+				})
+
+			}).addTo(map);
+		});
+
+
+	</script>
+
+</body>
+</html>
